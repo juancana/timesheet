@@ -22,43 +22,7 @@
 		<hr>
 
 		<hr>
-
-		<!-- Select year -->
-<!--		<div class="input-group">
-			<div class="input-group-prepend">
-				<a th:href="@{'/timesheet/'+${year-1}+'/'+${week}}"
-					class="btn btn-primary btn-sm mb-3"
-					th:text="'-'">
-				</a>
-			</div>
-			<p th:text="'---Year: ' + ${year} + '---'"/>
-			
-			<div class="input-group-append">
-				<a th:href="@{'/timesheet/'+${year+1}+'/'+${week}}"
-					class="btn btn-primary btn-sm mb-3"
-					th:text="'+'">
-				</a>
-			</div>
-		</div>		
--->
-		<!-- Select week -->
-<!--		<div class="input-group">
-			<div class="input-group-prepend">
-				<a th:href="@{'/timesheet/'+${year}+'/'+${week-1}}"
-					class="btn btn-primary btn-sm mb-3"
-					th:text="'-'">			
-				</a>
-			</div>
-			<p th:text="'---Week: ' + ${week} + '---'"/>
-			<div class="input-group-append">
-				<a th:href="@{'/timesheet/'+${year}+'/'+${week+1}}"
-					class="btn btn-primary btn-sm mb-3"
-					th:text="'+'">
-				</a>
-			</div>
-		</div>
--->
-		
+	
 		<div class="d-flex justify-content-between">
 		      <div>
 		      	
@@ -82,7 +46,7 @@
 					</div>	
 									    				    
 					<br>			
-					<button type="submit" class="btn btn-info">Refresh</button>
+					<button type="submit" class="btn btn-primary">Refresh</button>
 			 	</form>
 		      	
 		      </div>
@@ -93,11 +57,11 @@
 		
 		<!-- Options button -->
 		<a th:href="@{/timesheet/options/mainMenu}"
-			class="btn btn-primary btn-sm mb-3">
+			class="btn btn-info">
 			Options
 		</a>
 		
-		
+		<hr>
 		
 		<!-- Table with employees -->
 		<table class="table table-bordered table-striped">
@@ -117,7 +81,7 @@
 					<td>
 						<!--  Add update button/link -->	
 						<a th:href="@{'/timesheet/'+${year}+'/'+${week} +'/'+${tempEmployee.id}}"
-								class="btn btn-info btn-sm">
+								class="btn btn-warning btn-sm">
 						Details
 						</a>
 						

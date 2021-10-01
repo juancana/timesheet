@@ -28,7 +28,7 @@
 		      <div>
 		      	
 		      	<a th:href="@{'/timesheet/'+${viewParameters.year}+'/'+${viewParameters.week}}" 
-		 		class="btn btn-danger btn-sm mb-3" th:text="'Week Main View'">
+		 		class="btn btn-secondary btn-sm mb-3" th:text="'Week Main View'">
 		 		</a>
 		        
 		      </div>
@@ -59,7 +59,7 @@
 				    </div>
 				    
 					<br>			
-					<button type="submit" class="btn btn-info">Refresh</button>
+					<button type="submit" class="btn btn-primary">Refresh</button>
 			 	</form>
 		      	
 		      </div>
@@ -89,7 +89,7 @@
 					<!--  Add "details" button/link except for the "Totals" row-->	
 					<span th:if="${rowStat.index < 8}">
 						<a th:href="@{'/timesheet/'+${viewParameters.year} +'/'+ ${viewParameters.week} +'/'+ ${viewParameters.employeeId} +'/'+ ${rowStat.index - 1}}"
-								class="btn btn-info btn-sm">
+								class="btn btn-warning btn-sm">
 						Details
 						</a>
 					</span>

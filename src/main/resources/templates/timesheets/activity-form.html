@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- To use thymeleaf expressions -->
+
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+
+	<title>Save Activity</title>
+	
+</head>
+
+<body>
+
+	<div class="container">
+		<h3>Activity Form</h3>
+		<p th:text="'Employee: ' + ${theEmployee.firstName} + ' ' + ${theEmployee.lastName}" />
+		<hr>
+		
+		<p class="h4 mb-4">Save Activity</p>
+		
+		<form action="#" th:action="@{/timesheet/save(timeFrameId = ${timeFrame.id}, employee = ${timeFrame.employee.getId}, week = ${viewParameters.week}, employeeId=${viewParameters.employeeId}, year=${viewParameters.year}, dayOfWeek=${viewParameters.dayOfWeek})}"
+				th:object="${activ}"
+				method="POST">
+			
+			<!-- Hidden field to handle the update (If no id, it would save instead of update)-->
+			<input type="hidden" th:field="${timeFrame.id}"/>	
+			
+			<div class="form-group">
+				<label for="timesParsed.start"> Start time</label> 
+				<input type="time" id="${timesParsed.start}" name="timesParsed.start" required
+						th:field="${timesParsed.start}" />
+			</div>
+			<br>
+			<div class="form-group">			
+				<label for="timesParsed.end"> End time</label> 
+				<input type="time" id="${timesParsed.end}" name="timesParsed.end" required
+						th:field="${timesParsed.end}" />
+			</div>		
+			<br>		
+		    <div class="form-group">
+		        <label for="activ" th:text="Activity"></label>
+		        <select  id="activ" name="activ">
+		            <option th:each="act : ${activities}"
+		                    th:value="${act.actId}"
+		                    th:text="${act.description}"
+		                    th:selected="${act.actId==timeFrame.activity.actId}">
+		            </option>
+		        </select>
+		    </div>  		    
+			
+		    <br>
+			<br>			
+			<button type="submit" class="btn btn-info col-2">Save</button>
+	 	</form>	
+		
+	 	
+	 	<br>
+	 	<a th:href="@{'/timesheet/'+${viewParameters.year}
+			 				 +'/'+ ${viewParameters.week} 
+			 				 +'/'+ ${viewParameters.employeeId} 
+			 				 +'/'+ ${viewParameters.dayOfWeek}}" 
+			 				 class="btn btn-danger btn-sm">Cancel</a>
+	 	
+		
+	</div>
+
+</body>
+</html>

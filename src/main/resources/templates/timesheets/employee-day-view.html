@@ -1,0 +1,152 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- To use thymeleaf expressions -->
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+	<title>Hours View	</title>
+	
+	<!-- Reference CSS file-->
+	<link rel="stylesheet"
+		  th:href="@{/css/demo.css}"/>
+	
+</head>
+
+<body>
+	<div class="container">
+		<h3>Employee Day View</h3>
+		<hr>
+		
+		<hr>
+		
+	 	<div class="d-flex justify-content-between">
+		      <div>
+		      	
+		      	<a th:href="@{'/timesheet/'+${viewParameters.year} +'/'+ ${viewParameters.week}}" 
+		 		class="btn btn-secondary btn-sm mb-3" th:text="'Week Main View'">		 		
+		 		</a>
+		 		<br>
+		 		<a th:href="@{'/timesheet/'+${viewParameters.year} +'/'+ ${viewParameters.week} +'/'+ ${viewParameters.employeeId}}" 
+		 		class="btn btn-secondary btn-sm mb-3" th:text="'Week Employee View'">
+		 		</a>
+		        
+		      </div>
+		      
+		      <div>
+		      	<form action="#" th:action="@{/timesheet/updateEmployeeDayView}" 
+						th:object="${viewParameters}" method="POST">
+					<div class="form-group">
+						<label th:text="Year"></label>
+						<input type="number" id="year" name="year" required
+							   th:field="*{year}" th:value="*{year}" min="2020" max ="2022" />
+					</div>	
+					<br>	
+					<div class="form-group">
+						<label th:text="Week"></label>
+						<input type="number" id="week" name="week" required
+							   th:field="*{week}" th:value="*{week}" min="1" max ="52" />
+					</div>		
+					<br>	
+				    <div class="form-group">
+				        <label th:text="Employee"></label>
+				        <select th:field="*{employeeId}">				        
+				            <option th:each="employee : ${activeEmployees}"
+				                    th:value="${employee.id}"
+				                    th:text="${employee.firstName} + ' ' + ${employee.lastName}">
+				            </option>				            
+				        </select>
+				    </div>
+				    <br>
+				    <div class="form-group">
+				        <label th:text="'Day of Week'"></label>
+				        <select  id="dayOfWeek" name="dayOfWeek">				        
+				            <option th:each="day : ${daysOfWeek}"
+				                    th:value="${day}"
+				                    th:text="${days[dayStat.index]}"
+				                    th:selected="${dayStat.index==dayOfWeek+1}">
+				            </option>				            
+				        </select>
+				    </div>
+				    
+					<br>			
+					<button type="submit" class="btn btn-primary">Refresh</button>
+			 	</form>
+		      	
+		      </div>
+		 </div>
+	 	
+	 	<hr>
+	 	
+	 	<!-- Show statistics of the day -->
+	 	<table class="table table-bordered table-striped">
+			<thead class="thead-dark">
+				<tr>
+					<th>Regular Hours</th>
+					<th>Overtime</th>	
+					<th>Sick Hours</th>	
+					<th>Holiday Hours</th>						
+					<th>Vacation Hours</th>	
+				</tr>
+			</thead>
+		    <tr >		    	
+		        <td th:each="value: ${statistics}" th:text="${value}" />
+		    </tr>
+		</table>
+		
+		<a th:href="@{/timesheet/addActivity(employeeId=${viewParameters.employeeId}, year=${viewParameters.year}, week=${viewParameters.week}, dayOfWeek=${viewParameters.dayOfWeek})}" 
+			 				 class="btn btn-success ">Add new activity</a>
+		
+		<hr>
+	 	
+		
+	 	<table class="table table-bordered table-striped">
+			<thead class="thead-dark">
+				<tr>
+					<th>Week Day</th>
+					<th>Hours</th>
+					<th>Activity</th>	
+					<th>Action</th>			
+				</tr>
+			</thead>
+			
+			<tbody>
+				<tr th:each="tempTime : ${theTimes}">
+					<td th:text="${#dates.dayOfWeekName(tempTime.startTime)}" />
+					<!-- <td th:text="${#numbers.formatInteger(tempTime.startTime.get(Calendar.HOUR),2)} + ':' + ${#numbers.formatInteger(tempTime.startTime.get(Calendar.MINUTE),2)}+ ' -- ' + ${#numbers.formatInteger(tempTime.endTime.get(Calendar.HOUR),2)} + ':' + ${#numbers.formatInteger(tempTime.endTime.get(Calendar.MINUTE),2)}" />	
+					 -->
+					 <td th:text="${#dates.hour(tempTime.startTime)} + ':' + ${#numbers.formatInteger(#dates.minute(tempTime.startTime),2)} + ' -- ' + ${#dates.hour(tempTime.endTime)}+ ':' + ${#numbers.formatInteger(#dates.minute(tempTime.endTime),2)}"/>	
+					 
+					 <td th:text="${tempTime.activity.description}" />	
+					
+					<td>
+						<!--  Add update activity button/link -->	
+						
+						<a th:href="@{/timesheet/updateActivity(timeFrameId=${tempTime.id}, employeeId=${viewParameters.employeeId}, year=${viewParameters.year}, week=${viewParameters.week}, dayOfWeek=${viewParameters.dayOfWeek})}"
+								class="btn btn-warning btn-sm">
+						Edit
+						</a>
+						
+						<!--  Add delete button/link -->	
+						<a th:href="@{/timesheet/deleteActivity(timeFrameId=${tempTime.id}, viewWeek=${viewParameters.week})}"
+								class="btn btn-danger btn-sm"
+								onclick="if (!(confirm('Are you sure you want to delete this activity?'))) return false">
+						Delete
+						</a>
+						
+					</td>	
+				</tr>
+			</tbody>		
+		
+		</table>
+	 		
+		
+	</div>	
+	
+</body>
+
+</html>

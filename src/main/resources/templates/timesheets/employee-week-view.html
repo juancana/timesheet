@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- To use thymeleaf expressions -->
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+	<title>Hours View	</title>
+	
+	<!-- Reference CSS file-->
+	<link rel="stylesheet"
+		  th:href="@{/css/demo.css}"/>
+	
+</head>
+
+<body>
+	<div class="container">
+		<h3>Employee Week View</h3>
+		<hr>
+		
+		<hr>
+		
+	 	<div class="d-flex justify-content-between">
+		      <div>
+		      	
+		      	<a th:href="@{'/timesheet/'+${viewParameters.year}+'/'+${viewParameters.week}}" 
+		 		class="btn btn-danger btn-sm mb-3" th:text="'Week Main View'">
+		 		</a>
+		        
+		      </div>
+		      
+		      <div>
+		      	<form action="#" th:action="@{/timesheet/updateEmployeeWeekView}" 
+						th:object="${viewParameters}" method="POST">
+					<div class="form-group">
+						<label th:text="Year"></label>
+						<input type="number" id="*{year}" name="year" required
+							   th:field="*{year}" th:value="*{year}" min="2020" max ="2022" />
+					</div>
+					<br>		
+					<div class="form-group">
+						<label th:text="Week"></label>
+						<input type="number" id="*{week}" name="week" required
+							   th:field="*{week}" th:value="*{week}" min="1" max ="52" />
+					</div>		
+					<br>	
+				    <div class="form-group">
+				        <label th:text="Employee"></label>
+				        <select th:field="*{employeeId}">				        
+				            <option th:each="employee : ${activeEmployees}"
+				                    th:value="${employee.id}"
+				                    th:text="${employee.firstName} + ' ' + ${employee.lastName}">
+				            </option>				            
+				        </select>
+				    </div>
+				    
+					<br>			
+					<button type="submit" class="btn btn-info">Refresh</button>
+			 	</form>
+		      	
+		      </div>
+		 </div>
+	 	
+	 	<hr>
+
+		
+		<table class="table table-bordered table-striped">
+			<thead class="thead-dark">
+				<tr>
+					<th>Week Day</th>
+					<th>Regular Hours</th>
+					<th>Overtime</th>	
+					<th>Sick Hours</th>	
+					<th>Holiday Hours</th>						
+					<th>Vacation Hours</th>						
+					<th></th>	
+				</tr>
+			</thead>
+		    <tr th:each="row: ${statistics}">
+		    	<td th:text="${days[rowStat.index]}" />			    	
+		        <td th:each="value: ${row}"  >
+		        	<p th:if="${value}" th:text="${value}"/>
+		        </td>
+		        <td>
+					<!--  Add "details" button/link except for the "Totals" row-->	
+					<span th:if="${rowStat.index < 8}">
+						<a th:href="@{'/timesheet/'+${viewParameters.year} +'/'+ ${viewParameters.week} +'/'+ ${viewParameters.employeeId} +'/'+ ${rowStat.index - 1}}"
+								class="btn btn-info btn-sm">
+						Details
+						</a>
+					</span>
+				</td>
+		    </tr>
+		</table>
+		
+	</div>	
+	
+	
+	
+
+</body>
+
+</html>

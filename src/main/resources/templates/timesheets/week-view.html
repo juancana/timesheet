@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- To use thymeleaf expressions -->
+
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+
+	<title>Week View</title>
+	
+</head>
+
+<body>
+	
+	<div class="container">
+		<h3>Week view</h3>
+		<hr>
+
+		<hr>
+
+		<!-- Select year -->
+<!--		<div class="input-group">
+			<div class="input-group-prepend">
+				<a th:href="@{'/timesheet/'+${year-1}+'/'+${week}}"
+					class="btn btn-primary btn-sm mb-3"
+					th:text="'-'">
+				</a>
+			</div>
+			<p th:text="'---Year: ' + ${year} + '---'"/>
+			
+			<div class="input-group-append">
+				<a th:href="@{'/timesheet/'+${year+1}+'/'+${week}}"
+					class="btn btn-primary btn-sm mb-3"
+					th:text="'+'">
+				</a>
+			</div>
+		</div>		
+-->
+		<!-- Select week -->
+<!--		<div class="input-group">
+			<div class="input-group-prepend">
+				<a th:href="@{'/timesheet/'+${year}+'/'+${week-1}}"
+					class="btn btn-primary btn-sm mb-3"
+					th:text="'-'">			
+				</a>
+			</div>
+			<p th:text="'---Week: ' + ${week} + '---'"/>
+			<div class="input-group-append">
+				<a th:href="@{'/timesheet/'+${year}+'/'+${week+1}}"
+					class="btn btn-primary btn-sm mb-3"
+					th:text="'+'">
+				</a>
+			</div>
+		</div>
+-->
+		
+		<div class="d-flex justify-content-between">
+		      <div>
+		      	
+		      	
+		        
+		      </div>
+		      
+		      <div>
+		      	<form action="#" th:action="@{/timesheet/updateWeekView}" 
+						th:object="${viewParameters}" method="POST">
+					<div class="form-group">
+						<label th:text="Year"></label>
+						<input type="number" id="year" name="year" required
+							   th:field="*{year}" th:value="*{year}" min="2020" max ="2022" />
+					</div>	
+					<br>	
+					<div class="form-group">
+						<label th:text="Week"></label>
+						<input type="number" id="week" name="week" required
+							   th:field="*{week}" th:value="*{week}" min="1" max ="52" />
+					</div>	
+									    				    
+					<br>			
+					<button type="submit" class="btn btn-info">Refresh</button>
+			 	</form>
+		      	
+		      </div>
+		 </div>	 	
+	 	<hr>
+	 	
+		
+		
+		<!-- Options button -->
+		<a th:href="@{/timesheet/options/mainMenu}"
+			class="btn btn-primary btn-sm mb-3">
+			Options
+		</a>
+		
+		
+		
+		<!-- Table with employees -->
+		<table class="table table-bordered table-striped">
+			<thead class="thead-dark">
+				<tr>
+					<th>First Name</th>
+					<th>Last Name</th>
+					<th> </th>				
+				</tr>
+			</thead>
+			
+			<tbody>
+				<tr th:each="tempEmployee : ${employees}">
+					<td th:text="${tempEmployee.firstName}" />
+					<td th:text="${tempEmployee.lastName}" />
+
+					<td>
+						<!--  Add update button/link -->	
+						<a th:href="@{'/timesheet/'+${year}+'/'+${week} +'/'+${tempEmployee.id}}"
+								class="btn btn-info btn-sm">
+						Details
+						</a>
+						
+					</td>					
+				</tr>
+			</tbody>		
+		
+		</table>
+		
+		<!-- Add new entry button -->
+		<a 
+			class="btn btn-primary btn-sm mb-3">
+			Add new entry
+		</a>
+		
+		<!-- Add new entry button -->
+		<a 
+			class="btn btn-primary btn-sm mb-3">
+			Add all active employees
+		</a>
+			
+	</div>
+</body>
+
+</html>

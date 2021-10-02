@@ -15,18 +15,19 @@
 	
 </head>
 
-<body>
+<body class="container bg-light">
 	
 	<div class="container">
-		<h3>Week view</h3>
+		<h3 th:text="'Year ' + ${viewParameters.year} 
+					+ ', Week ' + ${viewParameters.week} 
+					+ ': ' + ${displayMessage}"
+			class="p-5  mb-3" >
+		</h3>
 		<hr>
-
 		<hr>
 	
 		<div class="d-flex justify-content-between">
 		      <div>
-		      	
-		      	
 		        
 		      </div>
 		      

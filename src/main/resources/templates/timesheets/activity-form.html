@@ -15,14 +15,23 @@
 	
 </head>
 
-<body>
+<body class="container bg-light">
 
 	<div class="container">
-		<h3>Activity Form</h3>
-		<p th:text="'Employee: ' + ${theEmployee.firstName} + ' ' + ${theEmployee.lastName}" />
+		<h3 th:text="${displayMessage}"
+			class="p-5  mb-3" >
+		</h3>
+		
+		<hr>
 		<hr>
 		
 		<p class="h4 mb-4">Save Activity</p>
+
+		<div th:if="${error == true}" class="alert alert-danger" role="alert">
+		 	 <p class="h4 mb-4" >
+			ERROR: period of time already covered by another activity
+			</p>
+		</div>
 		
 		<form action="#" th:action="@{/timesheet/save(timeFrameId = ${timeFrame.id}, employee = ${timeFrame.employee.getId}, week = ${viewParameters.week}, employeeId=${viewParameters.employeeId}, year=${viewParameters.year}, dayOfWeek=${viewParameters.dayOfWeek})}"
 				th:object="${activ}"
@@ -56,7 +65,7 @@
 			
 		    <br>
 			<br>			
-			<button type="submit" class="btn btn-info col-2">Save</button>
+			<button type="submit" class="btn btn-success">Save</button>
 	 	</form>	
 		
 	 	
@@ -65,9 +74,7 @@
 			 				 +'/'+ ${viewParameters.week} 
 			 				 +'/'+ ${viewParameters.employeeId} 
 			 				 +'/'+ ${viewParameters.dayOfWeek}}" 
-			 				 class="btn btn-danger btn-sm">Cancel</a>
-	 	
-		
+			 				 class="btn btn-danger">Cancel</a>
 	</div>
 
 </body>

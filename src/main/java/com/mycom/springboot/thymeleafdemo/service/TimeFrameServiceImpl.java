@@ -43,21 +43,47 @@ public class TimeFrameServiceImpl implements TimeFrameService {
 	@Override
 	public boolean save(TimeFrame theTimeFrame) {
 		boolean success = false;
-		//Need to check if that time frame is already covered by that employee
-		if(theTimeFrame.getId() == 0) {
+		
+		//Need to check if the new time frame is already covered by that employee, 
+		//excluding holidays, which can overlap with working on OT
+		
+		if(theTimeFrame.getId() == 0) {//It is a new timeFrame
+			
+			//Lookup other timeframes that overlap this one
 			List<TimeFrame> check1 = timeRepository.findByEmployeeAndStartTimeBetween(theTimeFrame.getEmployee(),theTimeFrame.getStartTime(),theTimeFrame.getEndTime());
 			List<TimeFrame> check2 = timeRepository.findByEmployeeAndEndTimeBetween(theTimeFrame.getEmployee(),theTimeFrame.getStartTime(),theTimeFrame.getEndTime());
-			
-			if((check1 == null) && (check2 == null)) {
-				timeRepository.save(theTimeFrame);
+						
+			if((check1.isEmpty()) && (check2.isEmpty())) { //There are no overlaps
 				success = true;
-			}else {
-				System.out.println(">>> ERROR while saving time. Timeframe already covered");
 			}
-		}else {
-			timeRepository.save(theTimeFrame);
+			else {//There are overlapping time frames
+				
+				//Check for holidays 
+				if(((checkForHolidays(check1)>0 || check1.isEmpty()) //All overlapping frames are holidays or empty list
+							&& (checkForHolidays(check2)>0 || check2.isEmpty())  //And my frame is a WORK activity
+							&& theTimeFrame.getActivity().getDescription().equals("WORK"))) {
+					success = true;
+				}else if((checkForHolidays(check1)<0 || check1.isEmpty()) //All overlapping frames are WORKING activities or empty list
+							&& (checkForHolidays(check2)<0 || check2.isEmpty())//And my frame is a holiday
+							&& theTimeFrame.getActivity().getDescription().equals("HOLIDAY")) {
+					success = true;
+				}
+				else {
+					success = false;
+				}
+				
+			}
+			
+		}else { //It is not a new timeFrame, we are editing an old one
 			success = true;
 		}
+		
+		
+		if(success) 
+			timeRepository.save(theTimeFrame);
+		else 
+			System.out.println(">>> ERROR while saving time. Timeframe already covered");
+		
 		return success;
 	}
 	
@@ -121,7 +147,38 @@ public class TimeFrameServiceImpl implements TimeFrameService {
 		return times;
 	}
 	
-	
+	private int checkForHolidays(List<TimeFrame> thelist) {
+		//Returns 1 if all are holidays
+		//Returns 0 if mixed or empty
+		//Returns -1 if there are no holidays at all
+		int check = 0;
+		boolean allHolidays = true, allWork = true;
+		
+		if (!thelist.isEmpty()) {
+			for (TimeFrame timeFrame : thelist) {
+				if (timeFrame.getActivity().getDescription().equals("HOLIDAY")) {
+					allHolidays = allHolidays && true; 
+					allWork = allWork && false;
+				}else if (timeFrame.getActivity().getDescription().equals("WORK")){
+					allHolidays = allHolidays && false; 
+					allWork = allWork && true;
+				}else {
+					allHolidays = allHolidays && false; 
+					allWork = allWork && false;
+				}
+			}
+			
+			if(allHolidays && !allWork) { //All are holidays
+				check = 1;
+			}else if(!allHolidays && allWork) { //All are non holidays
+				check = -1;
+			}else if(!allHolidays &&!allWork) { //Mixed
+				check = 0;
+			}
+		}		
+		
+		return check;
+	}
 	
 	
 	private List<Calendar> timeFrameOfCompleteDay(Calendar theDay) {
@@ -169,20 +226,6 @@ public class TimeFrameServiceImpl implements TimeFrameService {
 		
 		return calendars;
 	}
-	/*
-	private List<Calendar> daysInAWeek(int year, int week){
-		
-		List<Calendar> days = new ArrayList<Calendar>();
-		
-		
-		for (int i=0; i<8; i++) {
-			days.add(Calendar.getInstance());
-			days.get(i).set(Calendar.YEAR, year);
-			days.get(i).set(Calendar.WEEK_OF_YEAR, week);
-		}
-		
-		return days;
-	}*/
 	
 	private List<TimeFrame>[] separateByDaysOfWeek(List<TimeFrame> timeList){
 		/*
@@ -195,13 +238,6 @@ public class TimeFrameServiceImpl implements TimeFrameService {
         }
 		
 		int dayOfWeek, hour;
-		/*
-		List<List<TimeFrame>> timesSeparated = new ArrayList<List<TimeFrame>>();
-		for (int i=0; i<8; i++) {
-			timesSeparated.add(null);
-		}
-		System.out.println(">>> timesSeparated: " + timesSeparated.toString());
-		*/
 		
 		for (int i=0; i< timeList.size(); i++) {			
 			dayOfWeek = timeList.get(i).getStartTime().get(Calendar.DAY_OF_WEEK);

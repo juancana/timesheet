@@ -17,11 +17,14 @@
 	
 </head>
 
-<body>
+<body class="container bg-light">
 	<div class="container">
-		<h3>Employee Day View</h3>
-		<hr>
-		
+		<h3 th:text="'Year ' + ${viewParameters.year} 
+					+ ', Week ' + ${viewParameters.week} 
+					+ ': ' + ${displayMessage}"
+			class="p-5  mb-3" >
+		</h3>		
+		<hr>		
 		<hr>
 		
 	 	<div class="d-flex justify-content-between">
@@ -98,39 +101,34 @@
 		    </tr>
 		</table>
 		
+		<!-- Add new activity button -->
 		<a th:href="@{/timesheet/addActivity(employeeId=${viewParameters.employeeId}, year=${viewParameters.year}, week=${viewParameters.week}, dayOfWeek=${viewParameters.dayOfWeek})}" 
 			 				 class="btn btn-success ">Add new activity</a>
-		
 		<hr>
 	 	
-		
+		<!-- Show time frames/activities of the day -->
 	 	<table class="table table-bordered table-striped">
 			<thead class="thead-dark">
 				<tr>
-					<th>Week Day</th>
 					<th>Hours</th>
 					<th>Activity</th>	
-					<th>Action</th>			
+					<th></th>			
 				</tr>
 			</thead>
 			
 			<tbody>
-				<tr th:each="tempTime : ${theTimes}">
-					<td th:text="${#dates.dayOfWeekName(tempTime.startTime)}" />
-					<!-- <td th:text="${#numbers.formatInteger(tempTime.startTime.get(Calendar.HOUR),2)} + ':' + ${#numbers.formatInteger(tempTime.startTime.get(Calendar.MINUTE),2)}+ ' -- ' + ${#numbers.formatInteger(tempTime.endTime.get(Calendar.HOUR),2)} + ':' + ${#numbers.formatInteger(tempTime.endTime.get(Calendar.MINUTE),2)}" />	
-					 -->
-					 <td th:text="${#dates.hour(tempTime.startTime)} + ':' + ${#numbers.formatInteger(#dates.minute(tempTime.startTime),2)} + ' -- ' + ${#dates.hour(tempTime.endTime)}+ ':' + ${#numbers.formatInteger(#dates.minute(tempTime.endTime),2)}"/>	
-					 
-					 <td th:text="${tempTime.activity.description}" />	
-					
+				<tr th:each="tempTime : ${theTimes}">	
+					<td th:text="${#dates.hour(tempTime.startTime)} 
+					 		+ ':' + ${#numbers.formatInteger(#dates.minute(tempTime.startTime),2)} 
+					 		+ ' to ' + ${#dates.hour(tempTime.endTime)}
+					 		+ ':' + ${#numbers.formatInteger(#dates.minute(tempTime.endTime),2)}"/>	
+					<td th:text="${tempTime.activity.description}" />						
 					<td>
 						<!--  Add update activity button/link -->	
-						
 						<a th:href="@{/timesheet/updateActivity(timeFrameId=${tempTime.id}, employeeId=${viewParameters.employeeId}, year=${viewParameters.year}, week=${viewParameters.week}, dayOfWeek=${viewParameters.dayOfWeek})}"
 								class="btn btn-warning btn-sm">
 						Edit
 						</a>
-						
 						<!--  Add delete button/link -->	
 						<a th:href="@{/timesheet/deleteActivity(timeFrameId=${tempTime.id}, viewWeek=${viewParameters.week})}"
 								class="btn btn-danger btn-sm"

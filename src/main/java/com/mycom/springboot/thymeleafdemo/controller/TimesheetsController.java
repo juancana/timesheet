@@ -98,8 +98,12 @@ public class TimesheetsController {
 		//Add to spring model
 		theModel.addAttribute("employees", theEmployees);
 
-		//ViewParameters vp = new ViewParameters(year, week); 
+		String[] temp = generateDatesOfWeek( year,  week);
+		String displayMessage = temp[0].split(" ")[1] + " to " + temp[7].split(" ")[1];
+		theModel.addAttribute("displayMessage", displayMessage);
+		
 		theModel.addAttribute("viewParameters", vp);
+		
 		
 		return "timesheets/week-view";
 	}
@@ -124,15 +128,19 @@ public class TimesheetsController {
 		 
 		List<Employee> activeEmployees = employeeService.findAll();
 		
-		//Set theTimes as a model attribute to pre-populate form
 		theModel.addAttribute("employee", employee);
 		theModel.addAttribute("statistics", theStatistics);	
 		theModel.addAttribute("days", theDays);		
 		theModel.addAttribute("viewParameters", vp);
 		theModel.addAttribute("activeEmployees", activeEmployees);
-	
-				
-		//Send over to our form		
+		
+		String[] temp = generateDatesOfWeek(vp.getYear(),  vp.getWeek());
+		String displayMessage = temp[0].split(" ")[1] 
+					 + " to " + temp[7].split(" ")[1]
+					 + " - " + employee.getFirstName()
+					 + " " + employee.getLastName();
+		theModel.addAttribute("displayMessage", displayMessage);	
+			
 		return "timesheets/employee-week-view";
 	}
 
@@ -173,17 +181,21 @@ public class TimesheetsController {
 		
 		int[] daysOfWeek = {-1, 0, 1, 2, 3, 4, 5, 6};
 		
-		//Set theTimes as a model attribute to pre-populate form
+		
 		theModel.addAttribute("employee", employee);
 		theModel.addAttribute("statistics", theStatistics);	
 		theModel.addAttribute("days", theDays);		
 		theModel.addAttribute("viewParameters", vp);
 		theModel.addAttribute("activeEmployees", activeEmployees);			
 		theModel.addAttribute("daysOfWeek", daysOfWeek);
-
 		theModel.addAttribute("theTimes", theTimes);	
 				
-		//Send over to our form		
+		String[] temp = generateDatesOfWeek(vp.getYear(),  vp.getWeek());
+		String displayMessage = temp[vp.getDayOfWeek() + 1]
+					 + " - " + employee.getFirstName()
+					 + " " + employee.getLastName();
+		theModel.addAttribute("displayMessage", displayMessage);
+		
 		return "timesheets/employee-day-view";
 	}
 
@@ -240,9 +252,17 @@ public class TimesheetsController {
 		theModel.addAttribute("viewParameters", vp);
 		theModel.addAttribute("activ", theTimeFrame.getActivity());
 		
+		String[] temp = generateDatesOfWeek(vp.getYear(),  vp.getWeek());
+		String displayMessage = "Creating new acivity on "
+					 + temp[vp.getDayOfWeek() + 1].split(" ")[1]
+					 + "/" + vp.getYear()
+					 + " for " + theEmployee.getFirstName()
+					 + " " + theEmployee.getLastName();
+		theModel.addAttribute("displayMessage", displayMessage);
+		
 		//For debugging
-		System.out.println(">>> Update Activity with: " + vp.toString());
-		System.out.println(">>> Created time frame: " + theTimeFrame.toString());
+		//System.out.println(">>> Update Activity with: " + vp.toString());
+		//System.out.println(">>> Created time frame: " + theTimeFrame.toString());
 		
 		return "timesheets/activity-form";
 	}
@@ -281,6 +301,14 @@ public class TimesheetsController {
 		theModel.addAttribute("viewParameters", vp);
 		theModel.addAttribute("activ", activ.getActId());
 		
+		String[] temp = generateDatesOfWeek(vp.getYear(),  vp.getWeek());
+		String displayMessage = "Updating acivity on "
+					 + temp[vp.getDayOfWeek() + 1].split(" ")[1]
+					 + "/" + vp.getYear()
+					 + " for " + theEmployee.getFirstName()
+					 + " " + theEmployee.getLastName();
+		theModel.addAttribute("displayMessage", displayMessage);
+		
 		return "timesheets/activity-form";
 	}
 	
@@ -288,7 +316,7 @@ public class TimesheetsController {
 	public String saveTimeFrame(@ModelAttribute("timeFrameId") int timeFrameId,
 								@ModelAttribute("timesParsed") TimeParser timeParser,
 								@ModelAttribute("viewParameters") ViewParameters vp,
-								@ModelAttribute("activ") int activity,
+								@ModelAttribute("activ") int activity,								
 								Model theModel) {
 		 
 		TimeFrame theTimeFrame = new TimeFrame();
@@ -339,6 +367,9 @@ public class TimesheetsController {
 			+ "/" + vp.getEmployeeId() 
 			+ "/" + vp.getDayOfWeek();
 		}else {
+			//Add an error message:
+			theModel.addAttribute("error", true);
+			
 			//Set model attributes to pre-populate form
 			theModel.addAttribute("timesParsed", timeParser);
 			theModel.addAttribute("timeFrame", theTimeFrame);
@@ -457,7 +488,7 @@ public class TimesheetsController {
 		for (int i=startDay; i<=endDay; i++) {
 			cal.set(Calendar.DAY_OF_YEAR, i);
 			theDays[j] = theDays[j] 
-							+ "\t" 
+							+ " " 
 							+ (cal.get(Calendar.MONTH)+1) 
 							+ "/" 
 							+ (cal.get(Calendar.DAY_OF_MONTH)) ;

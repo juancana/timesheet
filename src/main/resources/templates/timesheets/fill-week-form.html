@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- To use thymeleaf expressions -->
+
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+
+	<title>Fill Out Week</title>
+	
+</head>
+
+<body class="container bg-light">
+
+	<div class="container">
+		<h3 th:text="'Year ' + ${viewParameters.year} 
+					+ ', Week ' + ${viewParameters.week} 
+					+ ': Fill out copmlete week'"
+			class="p-5  mb-3" >
+		</h3>
+		<hr>
+		<hr>
+		
+		<p class="h5 mb-4">Please select employees. This will save all the regular working hours for this week for the selected employees. </p>
+
+		 
+		<form action="#" th:action="@{/timesheet/fillOutWeek( week = ${viewParameters.week}, year=${viewParameters.year})}"
+				th:object="${employees}"
+				method="POST">
+					
+		    <div th:each="item: *{list}"
+		    	 class="input-group mb-3">
+				<div class="input-group-prepend">
+				    <div class="input-group-text">		    	 
+						<input type="checkbox"
+							   name="employees"
+							   th:field="*{list}"
+			  		   		   th:text="${item.firstName} + ' ' + ${item.lastName}"
+							   th:value="${item.id}"
+			  		   		   />
+					</div>
+			  	</div>
+			  	
+			  	<!--  
+			  	<label th:text="' ' + ${tempEmployee.firstName} + ' ' + ${tempEmployee.lastName}" 
+			  		   class="form-control"></label>  -->
+		    </div> 
+		    
+		    <br>
+			<br>
+			<button type="submit" class="btn btn-success">Save</button>
+	 	</form>	 	
+		
+	 	
+	 	<br>
+	 	<a th:href="@{'/timesheet/'+${viewParameters.year}
+			 				 +'/'+ ${viewParameters.week}}" 
+			 class="btn btn-danger">
+			 Cancel
+		</a>
+	</div>
+
+</body>
+</html>

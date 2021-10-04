@@ -1,7 +1,10 @@
 package com.mycom.springboot.thymeleafdemo.controller;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -95,13 +98,16 @@ public class TimesheetsController {
 		//Get employees from db
 		List<Employee> theEmployees = timeFrameService.findEmployeesInAWeek(vp.getYear(),vp.getWeek());
 		
-		//Add to spring model
-		theModel.addAttribute("employees", theEmployees);
-
+		
+		float[][] theStatistics = obtainTotalWeekStatistics(theEmployees, vp.getYear(), vp.getWeek());
+		
 		String[] temp = generateDatesOfWeek( year,  week);
 		String displayMessage = temp[0].split(" ")[1] + " to " + temp[7].split(" ")[1];
-		theModel.addAttribute("displayMessage", displayMessage);
 		
+		//Add to spring model		
+		theModel.addAttribute("employees", theEmployees);
+		theModel.addAttribute("statistics", theStatistics);
+		theModel.addAttribute("displayMessage", displayMessage);		
 		theModel.addAttribute("viewParameters", vp);
 		
 		
@@ -122,8 +128,8 @@ public class TimesheetsController {
 		float[][] theStatistics = obtainWeekStatistics(theTimes);
 
 		
-		String[] theDays = generateDatesOfWeek(vp.getYear(),vp.getWeek()); //{"Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "TOTAL"};
-
+		String[] theDays = generateDatesOfWeek(vp.getYear(),vp.getWeek()); 
+		
 		vp.setEmployeeId(employeeId);
 		 
 		List<Employee> activeEmployees = employeeService.findAll();
@@ -179,8 +185,7 @@ public class TimesheetsController {
 		 
 		List<Employee> activeEmployees = employeeService.findAll();
 		
-		int[] daysOfWeek = {-1, 0, 1, 2, 3, 4, 5, 6};
-		
+		int[] daysOfWeek = {-1, 0, 1, 2, 3, 4, 5, 6};		
 		
 		theModel.addAttribute("employee", employee);
 		theModel.addAttribute("statistics", theStatistics);	
@@ -240,9 +245,6 @@ public class TimesheetsController {
 		theTimeFrame.setActivity(activityService.findById(1));
 		List<Activity> possibleActivities = activityService.findAll();
 		
-		//System.out.println("possibleActivities" + possibleActivities);
-		
-		
 		TimeParser timeParser = new TimeParser(theTimeFrame);	
 
 		theModel.addAttribute("timesParsed", timeParser);
@@ -271,22 +273,14 @@ public class TimesheetsController {
 	public String updateActivity(@RequestParam("timeFrameId") int theId,
 			 					 //@RequestParam("viewWeek") int viewWeek,
 			 					 @ModelAttribute("viewParameters") ViewParameters vp,
-								 Model theModel){
-		
+								 Model theModel){		
 		
 		//Get time frame from the service
 		TimeFrame theTimeFrame = timeFrameService.findById(theId);
 		Employee theEmployee = theTimeFrame.getEmployee();
 		
-		int theYear= theTimeFrame.getStartTime().get(Calendar.YEAR);
-		int dayOfWeek = theTimeFrame.getStartTime().get(Calendar.DAY_OF_WEEK);
-		
-		if(dayOfWeek > 6) {
-			dayOfWeek = dayOfWeek -7;
-		}
-			
 		//For debugging
-		System.out.println(">>> Update Activity with: " + vp.toString());		
+		System.out.println(">>> Update Activity with: " + vp.toString());
 		
 		TimeParser timeParser = new TimeParser(theTimeFrame);
 		List<Activity> possibleActivities = activityService.findAll();
@@ -350,14 +344,7 @@ public class TimesheetsController {
 		theTimeFrame.getStartTime().set(Calendar.MINUTE, timeParser.getStartMinute());
 		theTimeFrame.getEndTime().set(Calendar.HOUR_OF_DAY, timeParser.getEndHour());
 		theTimeFrame.getEndTime().set(Calendar.MINUTE, timeParser.getEndMinute());
-		/*
-		System.out.println(">>> Saving times: " + timeParser.getStart() + "---" + timeParser.getEnd() );
-		System.out.println("    timeFrameId: " + timeFrameId);
-		System.out.println("    activity: " + activity);
-		System.out.println("    VP: " + vp.toString());
-		System.out.println("    theTimeFrame: " + theTimeFrame.toString());	
-		System.out.println(">>> TimeFrame generated: " + theTimeFrame.toString() );
-		 */
+
 		
 		//Save the data
 		if(timeFrameService.save(theTimeFrame)) {
@@ -381,13 +368,64 @@ public class TimesheetsController {
 		}			
 		 
 	}
+	@GetMapping("/fillOutWeek")
+	public String showFillOutWeekForm(@ModelAttribute("viewParameters") ViewParameters vp,
+							  Model theModel){
+				
+		//Get active employees
+		List<Employee>  activeEmployees = employeeService.findAllActive();
+		
+		//Remove those employees that already have entries in DB for given week
+		List<Employee>  employeesWithActivity = new ArrayList<Employee>();		
+		for(Employee employee:activeEmployees) {
+			if(!timeFrameService.findByEmployeeAndWeek(employee, vp.getYear(), vp.getWeek()).isEmpty()) {
+				employeesWithActivity.add(employee);
+			}
+		}
+		activeEmployees.removeAll(employeesWithActivity);
+		
+		//Wrapper class to send to form
+		EmployeeList employees = new EmployeeList(activeEmployees);
+		
+		//Check if there are any employees that need to be processed
+		theModel.addAttribute("viewParameters", vp);
+		if(activeEmployees.isEmpty()) {			
+			//Back to week view
+			return "redirect:/timesheet/" + vp.getYear() 
+									+ "/" + vp.getWeek(); 		
+		}
+		else {
+			//Add data to model
+			theModel.addAttribute("employees", employees);			
+			//Show form
+			return "timesheets/fill-week-form";
+		}
+	}
+	
+	@PostMapping("/fillOutWeek")
+	public String fillOutWeek(@ModelAttribute("viewParameters") ViewParameters vp,
+							  @ModelAttribute("employees") EmployeeList  employees ,
+							  Model theModel){
+				
+		//Create and save new data for given employees
+		for(Employee employee:employees.getList()) {
+			for(int dayOfWeek=2; dayOfWeek <=6; dayOfWeek ++)
+				createDefaultWorkDayData(employee, vp.getYear(), vp.getWeek(),dayOfWeek);
+		}
+		
+		
+		//Add viewParameters data to model
+		theModel.addAttribute("viewParameters", vp);
+		
+		//Back to week view
+		return "redirect:/timesheet/" + vp.getYear() 
+								+ "/" + vp.getWeek(); 
+	}
 	
 	@GetMapping("/deleteActivity")
 	public String deleteActivity(@RequestParam("timeFrameId") int theId,
 			 					 @RequestParam("viewWeek") int viewWeek,			 					
 								 Model theModel){
-		
-		
 		//Get time frame from the service
 		TimeFrame theTimeFrame = timeFrameService.findById(theId); 
 		
@@ -404,9 +442,7 @@ public class TimesheetsController {
 		ViewParameters vp = new ViewParameters(theYear, 
 											viewWeek, 
 											employeeId, 
-											dayOfWeek );		 
-		
-		
+											dayOfWeek );		
 		return "redirect:/timesheet/" + vp.getYear() 
 								+ "/" + vp.getWeek() 
 								+ "/" + vp.getEmployeeId() 
@@ -458,8 +494,7 @@ public class TimesheetsController {
 			    {0,0,0,0,0},
 			    {0,0,0,0,0},
 			    {0,0,0,0,0},
-			    {0,0,0,0,0}
-			};
+			    {0,0,0,0,0}};
 		int i=0;
 		
 		for (List<TimeFrame> oneDayTimes:theTimes) {
@@ -472,6 +507,20 @@ public class TimesheetsController {
 		
 		return stats;
 	}
+	
+	private float[][] obtainTotalWeekStatistics(List<Employee> theEmployees, int year, int week){
+		float[][] stats = new float[theEmployees.size()][5];
+		int i = 0;
+		
+		for(Employee employee:theEmployees) {
+			float[][] temp = obtainWeekStatistics(timeFrameService.findByEmployeeAndWeekSeparateByDays(employee, year, week));
+			stats[i] = temp[8];
+			i++;
+		}
+		
+		return stats;
+	}
+	
 	
 	private String[] generateDatesOfWeek(int year, int week) {
 		String[] theDays = {"Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "TOTAL"};
@@ -493,9 +542,28 @@ public class TimesheetsController {
 							+ "/" 
 							+ (cal.get(Calendar.DAY_OF_MONTH)) ;
 			j++;
-		}	
+		}
 		
 		return theDays;
+	}
+	
+	private void createDefaultWorkDayData(Employee employee, int year, int week, int dayOfWeek) {
+		
+		Calendar defaultStart = Calendar.getInstance();
+		defaultStart.set(Calendar.YEAR, year);
+		defaultStart.set(Calendar.WEEK_OF_YEAR, week);
+		defaultStart.set(Calendar.DAY_OF_WEEK, dayOfWeek);			
+		defaultStart.set(Calendar.HOUR_OF_DAY, 7);
+		defaultStart.set(Calendar.MINUTE, 0);
+		defaultStart.set(Calendar.SECOND, 0);
+		defaultStart.set(Calendar.MILLISECOND, 0);
+		
+		Calendar defaultEnd = Calendar.getInstance();
+		defaultEnd.setTime(defaultStart.getTime());		
+		defaultEnd.set(Calendar.HOUR_OF_DAY, 15);
+		
+		TimeFrame timeFrame = new TimeFrame(employee, defaultStart, defaultEnd, activityService.findById(1));
+		timeFrameService.save(timeFrame);
 	}
 	
 }

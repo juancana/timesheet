@@ -68,41 +68,37 @@
 		<table class="table table-bordered table-striped">
 			<thead class="thead-dark">
 				<tr>
-					<th>First Name</th>
-					<th>Last Name</th>
+					<th>Employee</th>
+					<th>Regular Hours</th>
+					<th>Overtime</th>	
+					<th>Sick Hours</th>	
+					<th>Holiday Hours</th>						
+					<th>Vacation Hours</th>	
 					<th> </th>				
 				</tr>
 			</thead>
 			
 			<tbody>
 				<tr th:each="tempEmployee : ${employees}">
-					<td th:text="${tempEmployee.firstName}" />
-					<td th:text="${tempEmployee.lastName}" />
-
-					<td>
-						<!--  Add update button/link -->	
+					<td th:text="${tempEmployee.firstName} + ' ' + ${tempEmployee.lastName}" />
+					<td th:each="value: ${statistics[tempEmployeeStat.index]}"  >
+			        	<p th:if="${value}" th:text="${value}"/>
+			        </td>
+					<td><!--  Add update button/link -->	
 						<a th:href="@{'/timesheet/'+${year}+'/'+${week} +'/'+${tempEmployee.id}}"
 								class="btn btn-warning btn-sm">
 						Details
 						</a>
-						
 					</td>					
-				</tr>
+				</tr>				
 			</tbody>		
 		
 		</table>
-		
-		<!-- Add new entry button -->
-		<a 
-			class="btn btn-primary btn-sm mb-3">
-			Add new entry
-		</a>
-		
-		<!-- Add new entry button -->
-		<a 
-			class="btn btn-primary btn-sm mb-3">
-			Add all active employees
-		</a>
+		<!-- Add button/link for creating default data for the week -->
+		<a th:href="@{/timesheet/fillOutWeek(year=${viewParameters.year}, week=${viewParameters.week})}"
+			class="btn btn-success">
+			Fill out week
+		</a> 
 			
 	</div>
 </body>

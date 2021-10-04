@@ -50,4 +50,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 		employeeRepository.deleteById(theId);
 	}
 
+	@Override
+	public List<Employee> findAllActive() {
+		return employeeRepository.findByActiveTrue();
+	}
+
 }

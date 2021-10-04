@@ -16,6 +16,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
  * 	That's it! No need to write any code. This gives all basic CRUD methods
  */
 	
-	public List<Employee> findAllByOrderByLastNameAsc();  //Query methods
+	public List<Employee> findAllByOrderByLastNameAsc();  //Taking advantage of "Query methods" Spring JPA
+	
+	public List<Employee> findByActiveTrue(); 
 	
 }

@@ -83,7 +83,7 @@
 					<th></th>	
 				</tr>
 			</thead>
-		    <tr th:each="row: ${statistics}">
+		    <tr th:each="row: ${statistics}" th:style="${rowStat.last}? 'font-weight: bold;'">
 		    	<td th:text="${days[rowStat.index]}" />			    	
 		        <td th:each="value: ${row}"  >
 		        	<p th:if="${value}" th:text="${value}"/>
@@ -99,12 +99,8 @@
 				</td>
 		    </tr>
 		</table>
-		
 	</div>	
 	
-	
-	
-
 </body>
 
 </html>
